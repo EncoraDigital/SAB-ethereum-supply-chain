@@ -1,4 +1,5 @@
 const ProductManagement = artifacts.require("ProductManagement");
+const ChangeOwnership = artifacts.require("ChangeOwnership");
 
 contract("ProductManagement", accounts => {
 
@@ -64,3 +65,48 @@ contract("ProductManagement", accounts => {
     });
 
 });
+
+contract("ChangeOwnership", accounts => {
+
+    var pm
+    var contract
+    beforeEach(async function() {
+        pm = await ProductManagement.new({ from: accounts[0] })
+        contract = await ChangeOwnership.new(pm.address, { from: accounts[0] })
+    })
+
+    it("should be able to assign ownership to manufacturer when part does not have owner", async () => {
+        const serial_number = "123456"
+        const part_type = "wheel"
+        const creation_date = "12/12/18"
+
+        result = await pm.buildPart(serial_number, part_type, creation_date, { from: accounts[0] })
+        let p_hash = web3.utils.soliditySha3(accounts[0], web3.utils.fromAscii(serial_number),
+                                             web3.utils.fromAscii(part_type), web3.utils.fromAscii(creation_date))
+        
+        // 0 means part, 1 means product
+        const op_type = 0
+        result = await contract.addOwnership(op_type, p_hash)
+        result = await contract.currentPartOwner.call(p_hash)
+        assert.equal(result, accounts[0])
+    })
+
+    it("should be able to change ownership when owner requests", async () => {
+        const serial_number = "123456"
+        const part_type = "wheel"
+        const creation_date = "12/12/18"
+
+        result = await pm.buildPart(serial_number, part_type, creation_date, { from: accounts[0] })
+        let p_hash = web3.utils.soliditySha3(accounts[0], web3.utils.fromAscii(serial_number),
+                                             web3.utils.fromAscii(part_type), web3.utils.fromAscii(creation_date))
+        
+        // 0 means part, 1 means product
+        const op_type = 0
+        result = await contract.addOwnership(op_type, p_hash, { from: accounts[0] })
+
+        result = await contract.changeOwnership(op_type, p_hash, accounts[1], { from: accounts[0] })
+
+        result = await contract.currentPartOwner.call(p_hash)
+        assert.equal(result, accounts[1])
+    })
+})
