@@ -7,355 +7,61 @@
     <title>Supply Chain Demo</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/ethereum/web3.js@1.0.0-beta.36/dist/web3.min.js" integrity="sha256-nWBTbvxhJgjslRyuAKJHK+XcZPlCnmIAAMixz6EefVk="
-        crossorigin="anonymous"></script>
-
+    <script src="https://cdn.jsdelivr.net/gh/ethereum/web3.js@1.0.0-beta.33/dist/web3.min.js" ></script>
+    <script type="module" src="./js/parts.js"></script>
 </head>
 
 <body>
+    <nav class="teal">
+        <div class="nav-wrapper">
+            <!-- <a href="#" class="brand-logo right">Logo</a> -->
+            <ul id="nav-mobile" class="left hide-on-med-and-down">
+                <li><a href="index.html">Parts Factory</a></li>
+                <li><a href="car_factory.html">Car Factory</a></li>
+                <li><a href="dealer.html">Dealer</a></li>
+            </ul>
+        </div>
+    </nav>
     <div class="container">
-        <section id="part-factory">
-            <h2>Part Factory</h2>
-            <div class="row">
-                <div class="col s6">
-                    <label>Serial Number: </label><input type="text" id="create-serial-number" placeholder="Part Serial Number">
-                    <label>Part Type: </label>
-                    <select id="create-part-type" class="browser-default">
-                        <option>Wheel</option>
-                        <option>Engine</option>
-                        <option>Transmission</option>
-                    </select>
-                    <button id="build-part" class="waves-effect waves-light btn">Build Part</button>
-                </div>
-                <div id="part-list" class="collection with-header unique">
-                    <p class="collection-header">Parts Owned</p>
+        <h2>Part Factory</h2>
+        <div class="row">
+            <div class="col s6">
+                <label>Address: </label>
+                <p id="part-factory-address">0x84C4770F756B1dF55C998d074F42483FE1456A92</p>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col s6">
+                <label>Serial Number: </label><input type="text" id="create-serial-number" placeholder="Part Serial Number">
+                <label>Part Type: </label>
+                <select id="create-part-type" class="browser-default">
+                    <option>Wheel</option>
+                    <option>Engine</option>
+                    <option>Transmission</option>
+                </select>
+                <button id="build-part" class="waves-effect waves-light btn">Build Part</button>
+            </div>
+            <div id="part-list" class="collection with-header">
+                <p class="collection-header">Parts Owned</p>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col s6">
+                <div id="part-list-details">
+                    <label>Manufacturer Address:</label>
+                    <p id="details-address"></p>
+                    <label>Serial Number:</label>
+                    <p id="details-serial-num"></p>
+                    <label>Part Type:</label>
+                    <p id="details-part-type"></p>
+                    <label>Creation Date:</label>
+                    <p id="details-creation-date"></p>
+                    <input id="part-change-ownership-input" type="text" placeholder="Insert address">
+                    <button id="part-change-ownership-btn" class="waves-effect waves-light btn">Change Ownership</button>
                 </div>
             </div>
-            <div class="row">
-                <div class="col s6">
-                    <div id="part-list-details">
-                        <label>Manufacturer Address:</label>
-                        <p id="details-address"></p>
-                        <label>Serial Number:</label>
-                        <p id="details-serial-num"></p>
-                        <label>Part Type:</label>
-                        <p id="details-part-type"></p>
-                        <label>Creation Date:</label>
-                        <p id="details-creation-date"></p>
-                        <input type="text" placeholder="Insert address"><button class="waves-effect waves-light btn">Change
-                            Ownership</button>
-                    </div>
-                </div>
-            </div>
-        </section>
+        </div>
     </div>
-    <script>
-        function toggleActive(element) {
-            //Toggle class
-            if (element.classList.contains("active")) {
-                element.classList.remove("active")
-            } else {
-                element.classList.add("active")
-            }
-        }
-
-        function clearActiveExcept(element) {
-            //Clear all options from parent, except the one provided
-            var element_list = element.parentElement.children
-            for (var i = 0; i < element_list.length; i++) {
-                if (element_list[i] != element) {
-                    element_list[i].classList.remove("active")
-                }
-            }
-        }
-
-        function populateDetails(item, element) {
-            console.log("Populate details, get info from chain")
-            console.log(item)
-            //Query blockchain for data to fill element
-            window.pm.methods.parts(item).call({ from: accounts[0] }, function (error, part_info) {
-                if (error)
-                    console.log(error)
-                else {
-                    console.log("Part info")
-                    console.log(part_info)
-                    document.getElementById("details-address").textContent = part_info["manufacturer"]
-                    document.getElementById("details-serial-num").textContent = part_info["serial_number"]
-                    document.getElementById("details-part-type").textContent = part_info["part_type"]
-                    document.getElementById("details-creation-date").textContent = part_info["creation_date"]
-                }
-            })
-        }
-
-        function addItemToList(item, list_name) {
-            console.log("Populate parts")
-            //Receive item hash and add to list with some animations
-            var element = document.createElement("a")
-            element.textContent = item
-            element.classList.add("collection-item")
-            element.addEventListener("click", function () {
-                toggleActive(this)
-
-                if (this.parentElement.classList.contains("unique")) {
-                    clearActiveExcept(this)
-                }
-
-                if (this.classList.contains("active")) {
-                    //Add info to list_name-details
-                    var details_element = document.getElementById(list_name + "-details")
-                    if (details_element) {
-                        populateDetails(item, details_element)
-                    }
-                }
-            })
-            document.getElementById(list_name).appendChild(element)
-        }
-
-        function format_date() {
-            var date = new Date()
-            return ('0' + date.getHours().toString()).slice(-2) + ":" +
-                ('0' + date.getMinutes().toString()).slice(-2) + ":" +
-                ('0' + date.getSeconds().toString()).slice(-2) + " " +
-                ('0' + date.getDate().toString()).slice(-2) + "/" +
-                ('0' + (date.getMonth() + 1).toString()).slice(-2) + "/" +
-                ('0' + date.getFullYear().toString()).slice(-2)
-        }
-
-        window.onload = async function () {
-            //Web3 init
-            if (typeof web3 != 'undefined') {
-                web3 = new Web3(web3.currentProvider) // what Metamask injected 
-            } else {
-                // Instantiate and set Ganache as your provider
-                web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"));
-            }
-            //Load accounts
-            window.accounts = await web3.eth.getAccounts()
-            console.log("Loaded accounts")
-
-            // The interface definition for your smart contract (the ABI) 
-            window.pm = new web3.eth.Contract([
-                {
-                    "constant": true,
-                    "inputs": [
-                        {
-                            "name": "",
-                            "type": "bytes32"
-                        }
-                    ],
-                    "name": "products",
-                    "outputs": [
-                        {
-                            "name": "manufacturer",
-                            "type": "address"
-                        },
-                        {
-                            "name": "serial_number",
-                            "type": "string"
-                        },
-                        {
-                            "name": "product_type",
-                            "type": "string"
-                        },
-                        {
-                            "name": "creation_date",
-                            "type": "string"
-                        }
-                    ],
-                    "payable": false,
-                    "stateMutability": "view",
-                    "type": "function",
-                    "signature": "0x79054391"
-                },
-                {
-                    "constant": true,
-                    "inputs": [
-                        {
-                            "name": "",
-                            "type": "bytes32"
-                        }
-                    ],
-                    "name": "parts",
-                    "outputs": [
-                        {
-                            "name": "manufacturer",
-                            "type": "address"
-                        },
-                        {
-                            "name": "serial_number",
-                            "type": "string"
-                        },
-                        {
-                            "name": "part_type",
-                            "type": "string"
-                        },
-                        {
-                            "name": "creation_date",
-                            "type": "string"
-                        }
-                    ],
-                    "payable": false,
-                    "stateMutability": "view",
-                    "type": "function",
-                    "signature": "0x8c431b9f"
-                },
-                {
-                    "constant": true,
-                    "inputs": [
-                        {
-                            "name": "",
-                            "type": "int256"
-                        }
-                    ],
-                    "name": "test",
-                    "outputs": [
-                        {
-                            "name": "",
-                            "type": "string"
-                        }
-                    ],
-                    "payable": false,
-                    "stateMutability": "view",
-                    "type": "function",
-                    "signature": "0x9b22c05d"
-                },
-                {
-                    "inputs": [],
-                    "payable": false,
-                    "stateMutability": "nonpayable",
-                    "type": "constructor",
-                    "signature": "constructor"
-                },
-                {
-                    "constant": false,
-                    "inputs": [
-                        {
-                            "name": "serial_number",
-                            "type": "string"
-                        },
-                        {
-                            "name": "part_type",
-                            "type": "string"
-                        },
-                        {
-                            "name": "creation_date",
-                            "type": "string"
-                        }
-                    ],
-                    "name": "buildPart",
-                    "outputs": [
-                        {
-                            "name": "",
-                            "type": "bytes32"
-                        }
-                    ],
-                    "payable": false,
-                    "stateMutability": "nonpayable",
-                    "type": "function",
-                    "signature": "0xb9c2dc3a"
-                },
-                {
-                    "constant": false,
-                    "inputs": [
-                        {
-                            "name": "serial_number",
-                            "type": "string"
-                        },
-                        {
-                            "name": "product_type",
-                            "type": "string"
-                        },
-                        {
-                            "name": "creation_date",
-                            "type": "string"
-                        },
-                        {
-                            "name": "part_array",
-                            "type": "bytes32[6]"
-                        }
-                    ],
-                    "name": "buildProduct",
-                    "outputs": [
-                        {
-                            "name": "",
-                            "type": "bytes32"
-                        }
-                    ],
-                    "payable": false,
-                    "stateMutability": "nonpayable",
-                    "type": "function",
-                    "signature": "0xd2af2aec"
-                },
-                {
-                    "constant": false,
-                    "inputs": [
-                        {
-                            "name": "mytest",
-                            "type": "string"
-                        }
-                    ],
-                    "name": "buildTest",
-                    "outputs": [
-                        {
-                            "name": "",
-                            "type": "bool"
-                        }
-                    ],
-                    "payable": false,
-                    "stateMutability": "nonpayable",
-                    "type": "function",
-                    "signature": "0x78a7c90b"
-                },
-                {
-                    "constant": false,
-                    "inputs": [
-                        {
-                            "name": "product_hash",
-                            "type": "bytes32"
-                        }
-                    ],
-                    "name": "getParts",
-                    "outputs": [
-                        {
-                            "name": "",
-                            "type": "bytes32[6]"
-                        }
-                    ],
-                    "payable": false,
-                    "stateMutability": "nonpayable",
-                    "type": "function",
-                    "signature": "0x6e730329"
-                }
-            ])
-
-            window.pm.options.address = '0x9eD80b8Aa65Fd1936602988CeCd78cdbD79e9473'
-
-            document.getElementById("build-part").addEventListener("click", function () {
-                console.log("Create Part")
-                // Get required data and create part on blockchain using web3
-
-                var serial = document.getElementById("create-serial-number").value
-                var part_type = document.getElementById("create-part-type").value
-
-                var creation_date = format_date()
-                console.log("Serial: " + serial + " Date:" + creation_date + "Part Type: " + part_type)
-
-                //Create part hash and send information to blockchain
-                var part_sha = web3.utils.soliditySha3(window.accounts[0], web3.utils.fromAscii(serial),
-                    web3.utils.fromAscii(part_type), web3.utils.fromAscii(creation_date))
-
-                window.pm.methods.buildPart(serial, part_type, creation_date).send({ from: window.accounts[0], gas: 1000000 }, function (error, result) {
-                    console.log("Smart Contract Transaction sent")
-                    console.log(result)
-                })
-
-                console.log(part_sha)
-
-                //Add part hash to part-list for querying
-                addItemToList(part_sha, "part-list")
-            })
-        }
-    </script>
 </body>
 
 </html>

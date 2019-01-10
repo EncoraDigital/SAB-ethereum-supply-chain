@@ -2,7 +2,7 @@ import { clearDetails, partListManager, carPartListManager, addItemToList, forma
 
 window.onload = async function () {
 
-    init_web3()
+    var x = await init_web3()
 
     document.getElementById("build-part").addEventListener("click", function () {
         console.log("Create Part")

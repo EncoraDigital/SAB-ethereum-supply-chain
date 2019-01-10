@@ -265,26 +265,6 @@ async function init_web3() {
             "signature": "0x8c431b9f"
         },
         {
-            "constant": true,
-            "inputs": [
-                {
-                    "name": "",
-                    "type": "int256"
-                }
-            ],
-            "name": "test",
-            "outputs": [
-                {
-                    "name": "",
-                    "type": "string"
-                }
-            ],
-            "payable": false,
-            "stateMutability": "view",
-            "type": "function",
-            "signature": "0x9b22c05d"
-        },
-        {
             "inputs": [],
             "payable": false,
             "stateMutability": "nonpayable",
@@ -355,26 +335,6 @@ async function init_web3() {
             "constant": false,
             "inputs": [
                 {
-                    "name": "mytest",
-                    "type": "string"
-                }
-            ],
-            "name": "buildTest",
-            "outputs": [
-                {
-                    "name": "",
-                    "type": "bool"
-                }
-            ],
-            "payable": false,
-            "stateMutability": "nonpayable",
-            "type": "function",
-            "signature": "0x78a7c90b"
-        },
-        {
-            "constant": false,
-            "inputs": [
-                {
                     "name": "product_hash",
                     "type": "bytes32"
                 }
@@ -393,7 +353,7 @@ async function init_web3() {
         }
     ])
 
-    window.pm.options.address = '0xa2047139dBb6cC4C3382537dC36F4885ac9091b5'
+    window.pm.options.address = '0xE5987169978243A040fba66245E982D884108A70'
 
     window.co = new web3.eth.Contract([
         {
@@ -449,6 +409,42 @@ async function init_web3() {
             "signature": "constructor"
         },
         {
+            "anonymous": false,
+            "inputs": [
+                {
+                    "indexed": true,
+                    "name": "p",
+                    "type": "bytes32"
+                },
+                {
+                    "indexed": true,
+                    "name": "account",
+                    "type": "address"
+                }
+            ],
+            "name": "TransferPartOwnership",
+            "type": "event",
+            "signature": "0x6a67eae68bb9deea9cbb16299fce22702092dc03cbcfd6a7babc7ac0036c7d4b"
+        },
+        {
+            "anonymous": false,
+            "inputs": [
+                {
+                    "indexed": true,
+                    "name": "p",
+                    "type": "bytes32"
+                },
+                {
+                    "indexed": true,
+                    "name": "account",
+                    "type": "address"
+                }
+            ],
+            "name": "TransferProductOwnership",
+            "type": "event",
+            "signature": "0xe2d5b74efaa0dc370d71f08be6bc6c865613194b7345262a998fb5232622c0b2"
+        },
+        {
             "constant": false,
             "inputs": [
                 {
@@ -501,9 +497,76 @@ async function init_web3() {
             "signature": "0xac814490"
         }
     ])
-    window.co.options.address = "0x9e3977727d1aC1BCF9B94BeC2B806a0248171556"
+    window.co.options.address = "0x5F064EDfd972D3Cd9A129b8DFE96Ea7fEe5Dd000"
 }
 
-export {toggleActive, clearActiveExcept, populateDetails, populateCarDetails, clearDetails, 
-        clearCarDetails, partListManager, carPartListManager, carListManager, addItemToList,
-        format_date, getActivePart, init_web3, getMultipleActivePart};
+async function getOwnerHistoryFromEvents(event, p_hash) {
+    return window.co.getPastEvents(event, { filter: { p: p_hash }, fromBlock: 0, toBlock: 'latest' }).then(
+        function (result) {
+            console.log(result);
+            //Get the owner history of the part or product
+            var owner_history = []
+            for (var i = 0; i < result.length; i++) {
+                owner_history.push(result[i].returnValues.account)
+            }
+            return owner_history
+        }
+    )
+}
+
+async function getOwnedItemsFromEvent(addr, event) {
+    return window.co.getPastEvents(event, { filter: { account: addr }, fromBlock: 0, toBlock: 'latest' }).then(
+        function (result) {
+            console.log(result)
+            //When we get 
+            var items = []
+            for (var i = 0; i < result.length; i++) {
+                items.push(result[i].returnValues.p)
+            }
+            return items
+        }
+    )
+}
+
+function populateOwnerDetails(owners, list_name) {
+    var owner_string = ""
+    for (var i = 0; i < owners.length; i++) {
+        owner_string += owners[i] + " "
+    }
+    document.getElementById(list_name).textContent = owner_string
+}
+
+function dealerPartListManager() {
+    toggleActive(this)
+    clearActiveExcept(this)
+
+    if (this.classList.contains("active")) {
+        getOwnerHistoryFromEvents('TransferPartOwnership', this.textContent).then((owners) => {
+            console.log("bbb")
+            console.log(owners)
+            populateOwnerDetails(owners, "part-owners")
+        })
+    } else {
+        clearOwnerDetails()
+    }
+}
+
+function dealerProductListManager() {
+    toggleActive(this)
+    clearActiveExcept(this)
+
+    if (this.classList.contains("active")) {
+        getOwnerHistoryFromEvents('TransferProductOwnership', this.textContent).then((owners) => {
+            populateOwnerDetails(owners, "car-owners")
+        })
+    } else {
+        clearOwnerDetails()
+    }
+}
+
+export {
+    toggleActive, clearActiveExcept, populateDetails, populateCarDetails, clearDetails,
+    clearCarDetails, partListManager, carPartListManager, carListManager, addItemToList,
+    format_date, getActivePart, init_web3, getMultipleActivePart, getOwnerHistoryFromEvents, getOwnedItemsFromEvent,
+    dealerPartListManager, dealerProductListManager
+};

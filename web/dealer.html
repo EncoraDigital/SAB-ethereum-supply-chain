@@ -7,8 +7,8 @@
     <title>Supply Chain Demo</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/ethereum/web3.js@1.0.0-beta.36/dist/web3.min.js" integrity="sha256-nWBTbvxhJgjslRyuAKJHK+XcZPlCnmIAAMixz6EefVk="
-        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/gh/ethereum/web3.js@1.0.0-beta.33/dist/web3.min.js"></script>
+    <script type="module" src="./js/dealer.js"></script>
 
 </head>
 
@@ -30,6 +30,26 @@
                 <h2>Dealer</h2>
                 <label>Address: </label>
                 <p id="dealer-address">0x9F61DD37328502Dd8d6bE5d7A0B0af466986cbF7</p>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col s6">
+                <div id="car-history" class="collection with-header">
+                    <p class="collection-header">Cars History</p>
+                </div>
+                <div id="car-details">
+                    <label>Owner History: </label>
+                    <p id="car-owners"></p>
+                </div>
+            </div>
+            <div class="col s6">
+                <div id="parts-history" class="collection with-header">
+                    <p class="collection-header">Parts History</p>
+                </div>
+                <div id="parts-details">
+                    <label>Owner History: </label>
+                    <p id="part-owners"></p>
+                </div>
             </div>
         </div>
     </div>
