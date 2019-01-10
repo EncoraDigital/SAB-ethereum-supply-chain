@@ -7,22 +7,22 @@
     <title>Supply Chain Demo</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/ethereum/web3.js@1.0.0-beta.33/dist/web3.min.js" ></script>
+    <script src="https://cdn.jsdelivr.net/gh/ethereum/web3.js@1.0.0-beta.33/dist/web3.min.js"></script>
     <script type="module" src="./js/parts.js"></script>
 </head>
 
 <body>
-    <nav class="teal">
-        <div class="nav-wrapper">
-            <!-- <a href="#" class="brand-logo right">Logo</a> -->
-            <ul id="nav-mobile" class="left hide-on-med-and-down">
-                <li><a href="index.html">Parts Factory</a></li>
-                <li><a href="car_factory.html">Car Factory</a></li>
-                <li><a href="dealer.html">Dealer</a></li>
-            </ul>
-        </div>
-    </nav>
     <div class="container">
+        <nav class="teal">
+            <div class="nav-wrapper">
+                <!-- <a href="#" class="brand-logo right">Logo</a> -->
+                <ul id="nav-mobile" class="left hide-on-med-and-down">
+                    <li><a href="index.html">Parts Factory</a></li>
+                    <li><a href="car_factory.html">Car Factory</a></li>
+                    <li><a href="dealer.html">Dealer</a></li>
+                </ul>
+            </div>
+        </nav>
         <h2>Part Factory</h2>
         <div class="row">
             <div class="col s6">
@@ -31,7 +31,7 @@
             </div>
         </div>
         <div class="row">
-            <div class="col s6">
+            <div class="col s12">
                 <label>Serial Number: </label><input type="text" id="create-serial-number" placeholder="Part Serial Number">
                 <label>Part Type: </label>
                 <select id="create-part-type" class="browser-default">
@@ -41,12 +41,14 @@
                 </select>
                 <button id="build-part" class="waves-effect waves-light btn">Build Part</button>
             </div>
+        </div>
+        <div class="row">
             <div id="part-list" class="collection with-header">
                 <p class="collection-header">Parts Owned</p>
             </div>
         </div>
         <div class="row">
-            <div class="col s6">
+            <div class="col s12">
                 <div id="part-list-details">
                     <label>Manufacturer Address:</label>
                     <p id="details-address"></p>
