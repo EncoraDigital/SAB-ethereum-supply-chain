@@ -19,6 +19,8 @@ contract ProductManagement{
 
     mapping(bytes32 => Part) public parts;
     mapping(bytes32 => Product) public products;
+
+    function getParts(bytes32 product_hash) public returns (bytes32[6] memory) {}
 }
 
 contract ChangeOwnership {
@@ -26,6 +28,9 @@ contract ChangeOwnership {
     enum OperationType {PART, PRODUCT}
     mapping(bytes32 => address) public currentPartOwner;
     mapping(bytes32 => address) public currentProductOwner;
+
+    event TransferPartOwnership(bytes32 indexed p, address indexed account);
+    event TransferProductOwnership(bytes32 indexed p, address indexed account);
     ProductManagement private pm;
 
     constructor(address prod_contract_addr) public {
@@ -40,12 +45,14 @@ contract ChangeOwnership {
             require(currentPartOwner[p_hash] == address(0), "Part was already registered");
             require(manufacturer == msg.sender, "Part was not made by requester");
             currentPartOwner[p_hash] = msg.sender;
+            emit TransferPartOwnership(p_hash, msg.sender);
         } else if (op_type == uint(OperationType.PRODUCT)){
             address manufacturer;
             (manufacturer, , , ) = pm.products(p_hash);
             require(currentProductOwner[p_hash] == address(0), "Product was already registered");
             require(manufacturer == msg.sender, "Product was not made by requester");
             currentProductOwner[p_hash] = msg.sender;
+            emit TransferProductOwnership(p_hash, msg.sender);
         }
     }
 
@@ -54,9 +61,18 @@ contract ChangeOwnership {
         if(op_type == uint(OperationType.PART)){
             require(currentPartOwner[p_hash] == msg.sender, "Part is not owned by requester");
             currentPartOwner[p_hash] = to;
+            emit TransferPartOwnership(p_hash, to);
         } else if (op_type == uint(OperationType.PRODUCT)){
-            require(currentProductOwner[p_hash] == msg.sender, "Part is not owned by requester");
+            require(currentProductOwner[p_hash] == msg.sender, "Product is not owned by requester");
             currentProductOwner[p_hash] = to;
+            emit TransferProductOwnership(p_hash, to);
+            //Change part ownership too
+            bytes32[6] memory part_list = pm.getParts(p_hash);
+            for(uint i = 0; i < part_list.length; i++){
+                currentPartOwner[part_list[i]] = to;
+                emit TransferPartOwnership(part_list[i], to);
+            }
+
         }
     }
 }
