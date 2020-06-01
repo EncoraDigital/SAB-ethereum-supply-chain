@@ -189,10 +189,12 @@ function getMultipleActivePart() {
 async function init_web3() {
     //Web3 init
     if (typeof web3 != 'undefined') {
-        web3 = new Web3(web3.currentProvider) // what Metamask injected 
+        web3 = new Web3(window.ethereum) // what Metamask injected 
+        console.log("Injecting metamask")
     } else {
         // Instantiate and set Ganache as your provider
         web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"));
+        console.log("RPC from localhost")
     }
     //Load accounts
     window.accounts = await web3.eth.getAccounts()
